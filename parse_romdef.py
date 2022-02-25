@@ -91,6 +91,9 @@ class ROMParser:
         json_file = script_path / "roms" / "gw.json"
         self.parse_one(json_file, "gw",["gw"])
 
+        json_file = script_path / "roms" / "snes.json"
+        self.parse_one(json_file, "snes",["snes"])
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Define ROMs name & pulish to the build environment")
 

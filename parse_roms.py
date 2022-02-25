@@ -71,6 +71,7 @@ SAVE_SIZES = {
     "sg": 60 * 1024,
     "pce": 76 * 1024,
     "gw": 4 * 1024,
+    "snes": 0, # TODO change to something sane
 }
 
 
@@ -779,6 +780,7 @@ class ROMParser:
         romdef.setdefault('sg', {})
         romdef.setdefault('pce', {})
         romdef.setdefault('gw', {})
+        romdef.setdefault('snes', {})
 
         save_size, rom_size, img_size = self.generate_system(
             "Core/Src/retro-go/gb_roms.c",
@@ -898,6 +900,22 @@ class ROMParser:
         build_config += "#define ENABLE_EMULATOR_GW\n" if rom_size > 0 else ""
 
         total_size = total_save_size + total_rom_size + total_img_size
+
+        save_size, rom_size, img_size = self.generate_system(
+            "Core/Src/retro-go/snes_roms.c",
+            "Super Nintendo Entertainment System",
+            "snes_system",
+            "snes",
+            ["smc"],
+            "SAVE_SNES_",
+	        romdef["snes"]
+        )
+        total_save_size += save_size
+        total_rom_size += rom_size
+        total_img_size += img_size
+        build_config += "#define ENABLE_EMULATOR_SNES\n" if rom_size > 0 else ""
+
+        total_size = total_save_size + total_rom_size
 
         if total_size == 0:
             print(

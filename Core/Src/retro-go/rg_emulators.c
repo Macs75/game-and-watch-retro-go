@@ -16,13 +16,14 @@
 #include "main_smsplusgx.h"
 #include "main_pce.h"
 #include "main_gw.h"
+#include "main_snes.h"
 #include "rg_rtc.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0
 #endif /* COVERFLOW */
 // Increase when adding new emulators
-#define MAX_EMULATORS 8
+#define MAX_EMULATORS 9
 static retro_emulator_t emulators[MAX_EMULATORS];
 static int emulators_count = 0;
 
@@ -432,13 +433,29 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
       SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_PCE_SIZE);
       app_main_pce(load_state, start_paused);
 #endif
+  } else if(strcmp(emu->system_name, "Super Nintendo Entertainment System") == 0) {
+#ifdef ENABLE_EMULATOR_SNES
+    printf("__RAM_EMU_START__: 0x%08lx\n", &__RAM_EMU_START__);
+
+    printf("_OVERLAY_SNES_LOAD_START:  0x%08lx\n", &_OVERLAY_SNES_LOAD_START);
+    printf("_OVERLAY_SNES_SIZE:  0x%08lx\n", &_OVERLAY_SNES_SIZE);
+
+    printf("_OVERLAY_SNES_BSS_START: 0x%08lx\n", &_OVERLAY_SNES_BSS_START);
+    printf("_OVERLAY_SNES_BSS_SIZE:  0x%08lx\n", &_OVERLAY_SNES_BSS_SIZE);
+
+    memcpy(&__RAM_EMU_START__, &_OVERLAY_SNES_LOAD_START, (size_t)&_OVERLAY_SNES_SIZE);
+    memset(&_OVERLAY_SNES_BSS_START, 0x0, (size_t)&_OVERLAY_SNES_BSS_SIZE);
+    SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SNES_SIZE);
+
+    app_main_snes(load_state, start_paused);
+#endif
   }
     
 }
 
 void emulators_init()
 {
-#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) || defined(ENABLE_EMULATOR_GW))
+#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) || defined(ENABLE_EMULATOR_GW) || defined(ENABLE_EMULATOR_SNES))
     // Add gameboy as a placeholder in case no emulator is built.
     add_emulator("Nintendo Gameboy", "gb", "gb", "gnuboy-go", 0, &pad_gb, &header_gb);
 #endif
@@ -476,6 +493,11 @@ void emulators_init()
 
 #ifdef ENABLE_EMULATOR_COL
     add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &pad_col, &header_col);
+#endif
+
+#ifdef ENABLE_EMULATOR_SNES
+    // TODO: Add a logo/header
+    add_emulator("Super Nintendo Entertainment System", "snes", "smc", "snes", 0, &pad_nes, &header_nes);
 #endif
 
     // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);

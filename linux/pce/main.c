@@ -105,20 +105,20 @@ static const struct
 } SaveStateVars[] =
 {
 	// Arrays
-	SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
+	SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VDC.VRAM),  SVAR_A("SPRAM", PCE.VDC.SPRAM),
 	SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
 
-	// CPU registers
-	SVAR_2("CPU.PC", CPU.PC),    SVAR_1("CPU.A", CPU.A),    SVAR_1("CPU.X", CPU.X),
-	SVAR_1("CPU.Y", CPU.Y),      SVAR_1("CPU.P", CPU.P),    SVAR_1("CPU.S", CPU.S),
+	// CPU_PCE registers
+	SVAR_2("CPU_PCE.PC", CPU_PCE.PC),    SVAR_1("CPU_PCE.A", CPU_PCE.A),    SVAR_1("CPU_PCE.X", CPU_PCE.X),
+	SVAR_1("CPU_PCE.Y", CPU_PCE.Y),      SVAR_1("CPU_PCE.P", CPU_PCE.P),    SVAR_1("CPU_PCE.S", CPU_PCE.S),
 
 	// Misc
 	SVAR_4("Cycles", Cycles),                   SVAR_4("MaxCycles", PCE.MaxCycles),
 	SVAR_1("SF2", PCE.SF2),                     SVAR_2("VBlankFL", PCE.VBlankFL),
 
 	// IRQ
-	SVAR_1("irq_mask", CPU.irq_mask),           SVAR_1("irq_mask_delay", CPU.irq_mask_delay),
-	SVAR_1("irq_lines", CPU.irq_lines),
+	SVAR_1("irq_mask", CPU_PCE.irq_mask),           SVAR_1("irq_mask_delay", CPU_PCE.irq_mask_delay),
+	SVAR_1("irq_lines", CPU_PCE.irq_lines),
 
 	// PSG
 	SVAR_1("psg.ch", PCE.PSG.ch),               SVAR_1("psg.vol", PCE.PSG.volume),
@@ -133,7 +133,7 @@ static const struct
 
 	// VDC
 	SVAR_A("vdc_regs", PCE.VDC.regs),           SVAR_1("vdc_reg", PCE.VDC.reg),
-	SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_satb", PCE.VDC.vram),
+	SVAR_1("vdc_status", PCE.VDC.status),       SVAR_1("vdc_vram", PCE.VDC.vram),
 	SVAR_1("vdc_satb", PCE.VDC.satb),			SVAR_4("vdc_pen_irqs", PCE.VDC.pending_irqs),
 
 	// Timer
@@ -325,6 +325,12 @@ const struct {
 	{0x55E9630D, "Legend of Hero Tonma", USA | US_ENCODED},
 	{0x083C956A, "Populous", JAP | ONBOARD_RAM},
 	{0x0A9ADE99, "Populous", JAP | ONBOARD_RAM},
+	{0xbebfe042, "Darius Plus", JAP | SGX },
+	{0x4c2126b0, "Aldynes", JAP | SGX },
+	{0x8c4588e2, "1941 - Counter Attack", JAP | SGX },
+	{0x1f041166, "Madouou Granzort", JAP | SGX },
+	{0xb486a8ed, "Daimakaimura", JAP | SGX },
+	{0x3b13af61, "Battle Ace", JAP | SGX },    
 };
 
 int LoadCard(const char *name) {
@@ -352,8 +358,13 @@ int LoadCard(const char *name) {
            }
        }
 
+       if ( pceRomFlags[IDX].Flags & SGX )
+           PCE.isSGX = true;
+        else PCE.isSGX = false;
+
        printf("Game Name: %s\n", pceRomFlags[IDX].Name);
        printf("Game Region: %s\n", (pceRomFlags[IDX].Flags & JAP) ? "Japan" : "USA");
+       printf("Supergrafix Game: %s\n", PCE.isSGX ? "Yes" : "No");
 
        // US Encrypted
     if ((pceRomFlags[IDX].Flags & US_ENCODED) || PCE.ROM_DATA[0x1FFF] < 0xE0) {

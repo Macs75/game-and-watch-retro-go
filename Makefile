@@ -40,6 +40,11 @@ Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/system_stm32h7xx.c
 
+# Add common C++ sources here
+CXX_SOURCES = \
+Core/Src/heap.cpp \
+
+
 GNUBOY_C_SOURCES = \
 Core/Src/porting/gb/main_gb.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/cpu.c \
@@ -163,6 +168,41 @@ LCD-Game-Emulator/src/gw_sys/gw_graphic.c \
 LCD-Game-Emulator/src/gw_sys/gw_system.c \
 Core/Src/porting/gw/main_gw.c
 
+SNES9X_CXX_SOURCES = \
+Core/Src/porting/snes9x/main_snes9x.cpp \
+3rdparty/snes9x/c4.cpp \
+3rdparty/snes9x/c4emu.cpp \
+3rdparty/snes9x/clip.cpp \
+3rdparty/snes9x/controls.cpp \
+3rdparty/snes9x/cpu.cpp \
+3rdparty/snes9x/cpuexec.cpp \
+3rdparty/snes9x/cpuops.cpp \
+3rdparty/snes9x/dma.cpp \
+3rdparty/snes9x/dsp1.cpp \
+3rdparty/snes9x/dsp2.cpp \
+3rdparty/snes9x/dsp.cpp \
+3rdparty/snes9x/gfx.cpp \
+3rdparty/snes9x/globals.cpp \
+3rdparty/snes9x/memmap.cpp \
+3rdparty/snes9x/ppu.cpp \
+3rdparty/snes9x/snapshot.cpp \
+3rdparty/snes9x/snes9x.cpp \
+3rdparty/snes9x/statemanager.cpp \
+3rdparty/snes9x/stream.cpp \
+3rdparty/snes9x/tile.cpp \
+\
+3rdparty/snes9x/apu/apu.cpp \
+3rdparty/snes9x/apu/bapu/dsp/SPC_DSP.cpp \
+3rdparty/snes9x/apu/bapu/dsp/sdsp.cpp \
+3rdparty/snes9x/apu/bapu/smp/smp.cpp \
+3rdparty/snes9x/apu/bapu/smp/smp_state.cpp \
+
+
+#3rdparty/snes9x/apu/bapu/smp/debugger/debugger.cpp \
+#3rdparty/snes9x/apu/bapu/smp/debugger/disassembler.cpp \
+
+
+
 C_INCLUDES +=  \
 -ICore/Inc \
 -ICore/Src/porting/lib \
@@ -181,13 +221,23 @@ C_INCLUDES +=  \
 -ILCD-Game-Emulator/src/cpus \
 -ILCD-Game-Emulator/src/gw_sys
 
+C_DEFS += \
+-DIS_LITTLE_ENDIAN \
+-DDISABLE_AHBRAM_DCACHE \
+-DMINIZ_NO_MALLOC \
+-DMINIZ_NO_ZLIB_APIS
+
 include Makefile.common
 
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
-	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms -j .overlay_col -j .overlay_pce -j .overlay_gw $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_gb -j .overlay_sms -j .overlay_col -j .overlay_pce -j .overlay_gw -j .overlay_snes $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 $(BUILD_DIR)/$(TARGET)_intflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
 	$(V)$(BIN) -j .isr_vector -j .text -j .rodata -j .ARM.extab -j .preinit_array -j .init_array -j .fini_array -j .data $< $(BUILD_DIR)/$(TARGET)_intflash.bin
+
+$(BUILD_DIR)/$(TARGET)_intflash2.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
+	$(V)$(ECHO) [ BIN ] $(notdir $@)
+	$(V)$(BIN) -j .snes_hot2 $< $(BUILD_DIR)/$(TARGET)_intflash2.bin

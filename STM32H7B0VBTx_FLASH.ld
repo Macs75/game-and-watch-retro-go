@@ -83,7 +83,7 @@ __RAM_CORE_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
 __RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
 
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
-
+__RAM_END__         = 0x24000000 + 1024K;
 /* saveflash.ld sets __SAVEFLASH_LENGTH__ */
 INCLUDE build/saveflash.ld
 __CONFIGFLASH_LENGTH__ = 4096;
@@ -240,6 +240,11 @@ SECTIONS
     __extflash_game_rom_start__ = .;
     *(.extflash_game_rom)
     __extflash_game_rom_end__ = .;
+
+    __extflash_snes_ro_start__ = .;
+    build/snes9x/*.o (.text .text* .rodata .rodata*)
+    __extflash_snes_ro_end__ = .;
+
   } > EXTFLASH
 
   .overlay_nes __RAM_EMU_START__ : {
@@ -362,6 +367,32 @@ SECTIONS
   _OVERLAY_GW_BSS_SIZE = SIZEOF(.overlay_gw_bss);
 
 
+  .overlay_snes __RAM_EMU_START__ : {
+    . = ALIGN(4);
+    __ram_emu_snes_start__ = .;
+    build/snes9x/*.o (.data .data*)
+
+    *(.snes_hot4)
+
+    . = ALIGN(4);
+    _OVERLAY_SNES_LOAD_END = .;
+  } AT> EXTFLASH
+  _OVERLAY_SNES_LOAD_START = LOADADDR(.overlay_snes);
+  _OVERLAY_SNES_SIZE = SIZEOF(.overlay_snes);
+
+  .overlay_snes_bss _OVERLAY_SNES_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_SNES_BSS_START = .;
+    build/snes9x/*.o (COMMON)
+    . = ALIGN(4);
+    build/snes9x/*.o (.bss .bss*)
+    _SNES_ROM_UNPACK_BUFFER = .;
+    _OVERLAY_SNES_BSS_END = .;
+    __ram_emu_snes_end__ = .;
+    ASSERT(ABSOLUTE(_OVERLAY_SNES_BSS_END) < __RAM_EMU_END__, "Error: SNES BSS overflow");
+  }
+  _OVERLAY_SNES_BSS_SIZE = SIZEOF(.overlay_snes_bss);
+
   /* Place this symbol after the last overlay definition */
   .overlay_end : {
     __extflash_end__ = .;
@@ -433,6 +464,8 @@ SECTIONS
 
     KEEP (*(.init))
     KEEP (*(.fini))
+
+    *(.snes_hot3)
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
