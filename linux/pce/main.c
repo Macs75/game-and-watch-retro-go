@@ -105,7 +105,7 @@ static const struct
 } SaveStateVars[] =
 {
 	// Arrays
-	SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VDC.VRAM),  SVAR_A("SPRAM", PCE.VDC.SPRAM),
+	SVAR_A("RAM", PCE.RAM),      SVAR_A("VRAM", PCE.VRAM),  SVAR_A("SPRAM", PCE.SPRAM),
 	SVAR_A("PAL", PCE.Palette),  SVAR_A("MMR", PCE.MMR),
 
 	// CPU_PCE registers
