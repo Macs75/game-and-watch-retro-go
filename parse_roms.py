@@ -1080,6 +1080,8 @@ class ROMParser:
             ["rom","mx1","mx2","dsk"],
             "SAVE_MSX_",
             romdef["msx"],
+            None,
+            current_id,
             args.compress
         )
         total_save_size += save_size
@@ -1093,7 +1095,9 @@ class ROMParser:
             "msx_bios",
             ["rom","sha"],
             "SAVE_MSXB_",
-            romdef["msx_bios"]
+            romdef["msx_bios"],
+            None,
+            current_id,
         )
         total_save_size += save_size
         total_rom_size += rom_size
