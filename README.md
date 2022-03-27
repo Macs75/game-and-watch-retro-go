@@ -24,10 +24,11 @@ Expert `UICODEPAGE=lang` set the ui display language, default `UICODEPAGE=CODEPA
 - 12521 : Español (translation by [Icebox2](https://github.com/Icebox2))
 - 12522 : Portuguese (translation by [DefKorns](https://github.com/DefKorns))
 - 12523 : Français (translation by [Narkoa](https://github.com/Narkoa))
+- 12524 : Italiano (translation by [SantX27](https://github.com/SantX27))
 - 932 : 日本語(Wait for translate support)
 
 You can set `[OPT]=[0|1]` to include or exclude some language, List of `OPT` parameter:
-`EN_US`  English; `ES_ES`  Español; `PT_PT` Portuguese; `FR_FR` Français; `ZH_CN` 简体中文;`ZH_TW` 繁體中文;`KO_KR` 한국어;`JA_JP` 日本語;
+`EN_US`  English; `ES_ES`  Español; `PT_PT` Portuguese; `FR_FR` Français;`IT_IT` Italiano; `ZH_CN` 简体中文;`ZH_TW` 繁體中文;`KO_KR` 한국어;`JA_JP` 日本語;
 
 other : Wait your support to translate
 
@@ -82,6 +83,7 @@ Supported emulators:
   - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
   - [Screenshots](#screenshots)
   - [Game Genie](#game-genie)
+    - [Game Genie on PCE System](#game-genie-on-pce-system)
   - [Upgrading the flash](#upgrading-the-flash)
   - [Advanced Flash Examples](#advanced-flash-examples)
     - [Custom Firmware (CFW)](#custom-firmware-cfw)
@@ -251,6 +253,34 @@ GOZSXX, Invincibility
 When you re-flash, you can enable / disable each of your codes in the game selection screen.
 
 A collection of codes can be found here: [https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes](https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes).
+
+### Game Genie on PCE System
+
+Now you can define rom patch for PCE Roms. You can found patch info from [Here](https://krikzz.com/forum/index.php?topic=1004.0).
+
+Then you can edit pce.json file after run `make romdef`. here is the patch define examples: 
+```
+    "1943 Kai (J)": {
+        "enable_save": "0",
+        "name": "1943 Kai (J)",
+        "publish": "1",
+        "patchs": [
+            {
+                "name": "Infinite Energy",
+                "items": {
+                    "0x1822F":"0xBD",
+                    "0x188FC":"0xBD"
+                }
+            },
+            {
+                "name": "Infinite Life",
+                "items": {
+                    "0x18330":"0xBD"
+                }
+            }
+        ]
+    },
+```
 
 ## Upgrading the flash
 
