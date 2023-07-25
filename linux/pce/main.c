@@ -466,8 +466,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
     static uint32_t lastFPSTime = 0;
     static uint32_t frames = 0;
     static int wantedTime = 1000 / 60;
-    float xScaleDown = 0;
-    float xScaleUp = 0;
+    int xScale = 0;
     int y=0, offsetY, offsetX = 0;
     uint8_t *fbTmp;
 
@@ -480,18 +479,15 @@ void pce_osd_gfx_blit(bool drawFrame) {
     uint32_t delta = currentTime - lastFPSTime;
 
 
-
-    odroid_display_scaling_t scaling = ODROID_DISPLAY_SCALING_OFF;
-
-    if (WIDTH<current_width) 
-        xScaleDown = (float) current_width / (float) WIDTH ;
-    else if (WIDTH>current_width && scaling != ODROID_DISPLAY_SCALING_OFF) 
-        xScaleUp = (float) WIDTH / (float) current_width ;
-    else offsetX = (WIDTH - current_width)/2; //center the image horizontally
+    odroid_display_scaling_t scaling = ODROID_DISPLAY_SCALING_FIT;
+    
+    if (current_width > 0 && scaling != ODROID_DISPLAY_SCALING_OFF) {
+        xScale =  (current_width << 8) / WIDTH ;
+    } else offsetX = (WIDTH - current_width)/2; //center the image horizontally
 
     offsetX = 0;
 
-   int renderHeight = (current_height<=HEIGHT)?current_height:HEIGHT;
+    int renderHeight = (current_height<=HEIGHT)?current_height:HEIGHT;
 
     uint8_t *emuFrameBuffer = osd_gfx_framebuffer();
     pixel_t *framebuffer_active = fb_data;//lcd_get_active_buffer();
@@ -506,22 +502,15 @@ void pce_osd_gfx_blit(bool drawFrame) {
     for(y=0;y<renderHeight;y++) {
         fbTmp = emuFrameBuffer+(y*XBUF_WIDTH);
         offsetY = y*current_width;
-        if (xScaleUp) {
-            // Horizontal - Scale up
+        if (xScale) {
+            // Horizontal - Scale 
             for(int x=0;x<WIDTH;x++) {
-                int input_x = (int) (x / xScaleUp);
-                framebuffer_active[offsetY+x]=mypalette[fbTmp[input_x]];
-            }
-        } else if (xScaleDown) {
-            // Horizontal - Scale down
-            for(int x=0;x<WIDTH;x++) {
-                int input_x = (int) (x * xScaleDown);
-                framebuffer_active[offsetY+x]= mypalette[fbTmp[input_x]];
+                framebuffer_active[offsetY+x]= mypalette[fbTmp[ (x * xScale) >> 8 ]];
             }
         } else {
             // No scaling, 1:1
             for(int x=0;x<current_width;x++) {
-                framebuffer_active[offsetY+x+offsetX]=mypalette[fbTmp[x]];
+                   framebuffer_active[offsetY+x+offsetX]=mypalette[fbTmp[x]];
             }
         }
     }
