@@ -479,7 +479,7 @@ void pce_osd_gfx_blit(bool drawFrame) {
     uint32_t delta = currentTime - lastFPSTime;
 
 
-    odroid_display_scaling_t scaling = ODROID_DISPLAY_SCALING_FIT;
+    odroid_display_scaling_t scaling = ODROID_DISPLAY_SCALING_OFF;
     
     if (current_width > 0 && scaling != ODROID_DISPLAY_SCALING_OFF) {
         xScale =  (current_width << 8) / WIDTH ;
